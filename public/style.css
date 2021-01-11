@@ -1,0 +1,205 @@
+@import url(https://fonts.googleapis.com/css?family=Montserrat);
+
+body {
+  background: #030321;
+  font: 1em "Montserrat";
+  font-weight: 500;
+  color: #ffffff;
+}
+
+svg {
+  display: block;
+  font: 10.5em "Montserrat";
+  width: 480px;
+  height: 300px;
+  margin: 0 auto;
+}
+
+.text-copy {
+  fill: none;
+  stroke: white;
+  stroke-dasharray: 6% 29%;
+  stroke-width: 5px;
+  stroke-dashoffset: 0%;
+  animation: stroke-offset 5.5s infinite linear;
+}
+
+.text-copy:nth-child(1) {
+  stroke: #ffffff;
+  animation-delay: -1;
+}
+
+.text-copy:nth-child(2) {
+  stroke: #16c0a9;
+  animation-delay: -2s;
+}
+
+.text-copy:nth-child(3) {
+  stroke: #ffffff;
+  animation-delay: -3s;
+}
+
+.text-copy:nth-child(4) {
+  stroke: #ffffff;
+  animation-delay: -4s;
+}
+
+.text-copy:nth-child(5) {
+  stroke: #16c0a9;
+  animation-delay: -5s;
+}
+
+@keyframes stroke-offset {
+  100% {
+    stroke-dashoffset: -35%;
+  }
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.rwd-table {
+  background: #34495e;
+  color: #16c0a9;
+  border-radius: 0.4em;
+  overflow: hidden;
+}
+.rwd-table tr {
+  border-color: #fff;
+}
+.rwd-table th,
+.rwd-table td {
+  margin: 0.5em 1em;
+}
+@media (min-width: 480px) {
+  .rwd-table th,
+  .rwd-table td {
+    padding: 1em !important;
+  }
+}
+.rwd-table th,
+.rwd-table td:before {
+  color: #dd5;
+}
+
+.insetbox {
+  margin-bottom: 40px;
+}
+
+.eninsetbox {
+  padding: 20px;
+  background: rgba(52, 73, 94, 0.15);
+  border-radius: 0.8em;
+  margin-bottom: 40px;
+}
+
+.eninsetbox__input {
+  background: rgba(52, 73, 94, 0.6);
+  color: #fff;
+  font-size: 17px;
+  border-radius: 0.4em;
+  outline: none;
+  margin-left: 15px;
+  border: none;
+  padding: 10px;
+  width: 20rem;
+}
+
+.eninsetbox__input:focus-within,
+.eninsetbox__input:hover {
+  box-shadow: 0 1px 6px 0 rgba(255, 255, 255, 0.28);
+  border-color: rgba(223, 225, 229, 0);
+}
+
+.eninsetbox__setitem {
+  color: #dd5;
+  font-size: 15px;
+  font-weight: 600;
+  margin: auto 10px;
+}
+
+.eninsetbox__button {
+  outline: none;
+  border: none;
+  padding: 10px;
+  margin-left: 15px;
+  border-radius: 8px;
+  color: #fff;
+  background: #16c0a9;
+}
+
+.eninsetbox__no {
+  color: #16c0a9;
+  font-size: 20px;
+  font-weight: 600;
+  margin-left: unset;
+  margin-right: 10px;
+}
+
+.eninsetbox__percent {
+  color: #dd5;
+  font-size: 30px;
+  font-weight: 600;
+  margin-left: unset;
+  margin-right: 10px;
+}
+
+.eninsetbox span {
+  margin-left: 10px;
+}
+
+.active {
+  background-color: #16c0a9 !important;
+}
+
+.footer {
+  margin-bottom: 0;
+  text-align: center;
+  margin: auto 10px;
+  font-weight: 600;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer a {
+  color: #fff;
+  margin: auto 10px;
+  text-decoration: none;
+  letter-spacing: 0.15em;
+  transition: width 0.3s ease 0s, left 0.3s ease 0s;
+}
+
+/* a:after {
+  background: none repeat scroll 0 0 transparent;
+  bottom: 0;
+  content: "";
+  display: block;
+  height: 2px;
+  left: 50%;
+  position: absolute;
+  background: #fff;
+
+  width: 0;
+}
+a:hover:after {
+  width: 100%;
+  left: 0;
+} */
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.footer__heart {
+  color: #fff;
+  height: 30px;
+  opacity: 0.7;
+  -webkit-filter: invert(100%);
+  filter: invert(100%);
+  margin: auto 10px;
+}

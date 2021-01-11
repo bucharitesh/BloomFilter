@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+<html lang='en' class=''>
+
+<head>
+
+  <meta charset='UTF-8'>
+  <title>BloomFilter Demo</title>
+
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+<script src="./murmurhash.js"></script>
+<script>
+// The Jenkins 96 bit mix function:
+// http://www.concentric.net/~Ttwang/tech/inthash.htm
+// stolen from Google Chromium's bloom filter
+// http://www.google.com/codesearch/p#OAMlx_jo-ck/src/chrome/browser/safe_browsing/bloom_filter.cc&exact_package=chromium
+// thanks dudes!
+var seed1 = Math.floor(Math.random() * 2e32);
+var seed2 = Math.floor(Math.random() * 2e32);
+function hashMix(hash_key) {
+  var a = seed1;
+  var b = seed2;
+  var c = hash_key;
+  console.log(a, b, c);
+
+  a -= (b + c);  a ^= (c >> 13);
+  b -= (c + a);  b ^= (a << 8);
+  c -= (a + b);  c ^= (b >> 13);
+  a -= (b + c);  a ^= (c >> 12);
+  b -= (c + a);  b ^= (a << 16);
+  c -= (a + b);  c ^= (b >> 5);
+  a -= (b + c);  a ^= (c >> 3);
+  b -= (c + a);  b ^= (a << 10);
+  c -= (a + b);  c ^= (b >> 15);
+
+  //XXX: can this even be negative? It was designed to run with uints. Javascript is dumb.
+  return Math.abs(c);
+}
+
+// thanks Borgar!
+// http://stackoverflow.com/questions/1240408/reading-bytes-from-a-javascript-string/1242596#1242596
+function stringToBytes(str) {
+  var ch, st, re = [];
+  for (var i = 0; i < str.length; i++) {
+    ch = str.charCodeAt(i);  // get char
+    st = [];                 // set up "stack"
+    do {
+      st.push( ch & 0xFF );  // push byte to stack
+      ch = ch >> 8;          // shift value down by 1 byte
+    }
+    while ( ch );
+    // add stack contents to result
+    // done because chars have "wrong" endianness
+    re = re.concat( st.reverse() );
+  }
+ // return an array of bytes
+  return re;
+}
+
+var FNVPRIME = 0x01000193;
+var FNVINIT = 0x811c9dc5;
+
+function fnv1s(str) {
+  var bytes = stringToBytes(str);
+  var hash = FNVINIT;
+  for (var i=0; i < bytes.length; i++) {
+    hash *= FNVPRIME;
+    hash ^= bytes[i];
+  }
+  return Math.abs(hash);
+}
+
+nboxes = 15;
+strings = [];
+
+function bloom(s) {
+  $(".active").attr("class", "set");
+
+  strings.push(s);
+  $("#yourset").html(strings.join(", "));
+
+  //clear the text input box
+  $("#addtoset").val("");
+
+  var a = fnv1s(s) % nboxes;
+  var b = murmur(s) % nboxes;
+
+  $("#bit[i='" + a + "']").attr("class", "active");
+  $("#bit[i='" + b + "']").attr("class", "active");
+
+  //the probability of a false positive is the number of 1s in the bit vector
+  //divided by the number of bits in the vector to the power of k, the number
+  //of index functions you're using
+  var p = Math.round((Math.pow($(".set, .active").length / nboxes, 2)) * 100);
+  $("#false_pos_prob").html(p + "%");
+}
+
+function testMembership(evt) {
+  //clear out "active" cells
+  $(".active").attr("class", "set");
+
+  var s = $("#membership").val();
+
+  var a = fnv1s(s) % nboxes;
+  var b = murmur(s) % nboxes;
+
+  if ($("#bit[i='" + a + "']").attr("class") == "set" &&
+      $("#bit[i='" + b + "']").attr("class") == "set") {
+    $("#ismember").html("maybe!");
+  } else {
+    $("#ismember").html("no");
+  }
+
+  $("#memfnv").html(a)
+  $("#memmurmur").html(b)
+}
+
+$(function() {
+  //add the table cells which represent our bloom filter bit array
+  for (var i=0; i<nboxes; i++) {
+    $("#bits").append('<td id="bit" i="' + i + '" width=20>&nbsp;</td>');
+    $("#labels").append('<td id="label" i="' + i + '" align="center">' + i + '</td>');
+  }
+
+  //handle a click on the "add to bloom filter" button
+  $("#hash").click(function() {
+    var s = $("#addtoset").val();
+    $("#fnv").html(fnv1s(s) % nboxes)
+    $("#murmur").html(murmur(s) % nboxes)
+    bloom(s);
+  });
+
+  // handle enter key on "add to bloom filter" form
+  $('#addtoset').keydown(function (event) {
+    if (event.keyCode == '13') {
+     event.preventDefault();
+     $('#hash').click();
+    }
+  });
+
+  $("#membership").keyup(testMembership);
+});
+</script>
+
+</head>
+
+<body>
+	<svg viewBox="0 0 960 300">
+		<symbol id="s-text">
+			<text text-anchor="middle" x="50%" y="80%">BloomFilter</text>
+		</symbol>
+
+		<g class = "g-ants">
+			<use xlink:href="#s-text" class="text-copy"></use>
+			<use xlink:href="#s-text" class="text-copy"></use>
+			<use xlink:href="#s-text" class="text-copy"></use>
+			<use xlink:href="#s-text" class="text-copy"></use>
+			<use xlink:href="#s-text" class="text-copy"></use>
+		</g>
+	</svg>
+
+	<div class="box">
+		<div class="insetbox">
+			<table id="bitvector" class="rwd-table" border=1 cellpadding=0 cellspacing=0>
+			<tr id="bits"></tr>
+			<tr id="labels"></tr>
+			</table>
+		</div>
+
+		<div id="addstring" class="eninsetbox">
+			<p>Enter a string: <input class="eninsetbox__input" id="addtoset"><input type="submit" id="hash" value="ADD" class="eninsetbox__button">
+
+			<div id="hashes">
+			Fnv: <span id="fnv"></span><br>
+			Murmur: <span id="murmur"></span>
+			</div>
+
+			<p>Your set: [<span id="yourset" class="eninsetbox__setitem"></span>]
+		</div>
+
+		<div id="testmembership" class="eninsetbox">
+			<p>Test an element for membership: <input id="membership" class="eninsetbox__input">
+			<div id="memhashes">
+				Fnv: <span id="memfnv"></span><br>
+				Murmur: <span id="memmurmur"></span>
+			</div>
+	
+			<p>Is the element in the set? <span id="ismember" class="eninsetbox__no">no</span>
+	
+			<p>Probability of a false positive: <span id="false_pos_prob" class="eninsetbox__percent">0%</span>
+		</div>
+
+	</div>
+
+	<footer>
+		<div class="footer">
+      Made with <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/176026/heart292_(1).png" class="footer__heart" alt="heart this pen" /> by 
+      <a href="https://bucharitesh.in">Ritesh Bucha</a> 
+      and 
+      <a href="https://www.linkedin.com/in/debaditya/">Debaditya Sen</a>
+		</div>
+	</footer>
+
+
+</body>
+</html>
